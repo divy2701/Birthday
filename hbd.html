@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Birthday Surprise</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html, body {
+      height: 100%;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(to right, #fbc2eb, #a6c1ee);
+      overflow: hidden;
+    }
+
+    .screen {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100%;
+      width: 100%;
+      flex-direction: column;
+      text-align: center;
+      z-index: 10;
+      position: relative;
+    }
+
+    h2 {
+      color: #222;
+      margin-bottom: 20px;
+      font-size: 32px;
+    }
+
+    input {
+      padding: 12px 20px;
+      font-size: 18px;
+      width: 280px;
+      border: 2px solid #ccc;
+      border-radius: 8px;
+      margin-bottom: 20px;
+    }
+
+    button {
+      padding: 12px 30px;
+      font-size: 18px;
+      background: linear-gradient(to right, #2575fc, #6a11cb);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: linear-gradient(to right, #6a11cb, #2575fc);
+    }
+
+    canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 0;
+    }
+
+    video {
+      width: 80%;
+      max-width: 700px;
+      border-radius: 12px;
+      margin-top: 20px;
+    }
+
+    #wrongMessage {
+      margin-top: 15px;
+      color: red;
+      font-size: 16px;
+    }
+
+    .hidden {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+<canvas id="fireworks"></canvas>
+
+<div class="screen" id="page1">
+  <h2>Solve the Puzzle to Unlock the Surprise!</h2>
+  <p style="font-size: 20px; margin-bottom: 20px;">
+    I float up high, colors bright,<br>
+    Squeeze me once, I take a flight.<br>
+    Tie me up or let me go,<br>
+    What’s this thing that loves to blow?
+    </p>
+  <input type="text" id="captchaInput" placeholder="Enter your answer">
+  <br>
+  <button onclick="checkCaptcha()">Submit</button>
+  <div id="wrongMessage"></div>
+</div>
+
+<div class="screen hidden" id="page2" style="background: url('happy-birthday-letters-party-items.jpg') no-repeat center center / cover;">
+  <h2 style="font-size: 50px; color: #ffffff; text-shadow: 3px 3px 8px #ff69b4, -2px -2px 6px #00bfff;">
+    🎉 Happy Birthday Rahul 🎉</h2>
+  
+  <video id="birthdayVideo" controls style="display: none;">
+    <source src="birthday_song.mp4" type="video/mp4">
+    Your browser does not support the video tag.
+  </video>
+</div>
+
+<script>
+  function checkCaptcha() {
+    const input = document.getElementById("captchaInput").value.trim();
+    const page1 = document.getElementById("page1");
+    const page2 = document.getElementById("page2");
+    const msg = document.getElementById("wrongMessage");
+
+    if (input.toLowerCase() === "balloon" || input.toLowerCase() === "balloons") {
+      page1.classList.add("hidden");
+      page2.classList.remove("hidden");
+      const vid = document.getElementById("birthdayVideo");
+      vid.style.display = "block";
+      vid.muted = false;
+      vid.play();
+    } else {
+      msg.textContent = "❌ Oops! That's not correct. Try again.";
+    }
+  }
+
+  // Fireworks animation
+  const canvas = document.getElementById('fireworks');
+  const ctx = canvas.getContext('2d');
+  let W = window.innerWidth;
+  let H = window.innerHeight;
+  canvas.width = W;
+  canvas.height = H;
+
+  let particles = [];
+
+  function random(min, max) {
+    return Math.random() * (max - min) + min;
+  }
+
+  function createFirework() {
+    const x = random(100, W - 100);
+    const y = random(100, H / 2);
+    const count = 100;
+
+    for (let i = 0; i < count; i++) {
+      particles.push({
+        x,
+        y,
+        speed: random(2, 10),
+        radius: random(1, 3),
+        angle: Math.random() * 2 * Math.PI,
+        alpha: 1,
+        decay: random(0.01, 0.02),
+        color: `hsl(${Math.floor(random(0, 360))}, 100%, 60%)`
+      });
+    }
+  }
+
+  function animateFireworks() {
+    ctx.fillStyle = "rgba(255, 255, 255, 0.15)";
+    ctx.fillRect(0, 0, W, H);
+
+    particles.forEach((p, index) => {
+      const vx = Math.cos(p.angle) * p.speed;
+      const vy = Math.sin(p.angle) * p.speed;
+
+      p.x += vx;
+      p.y += vy;
+      p.alpha -= p.decay;
+
+      if (p.alpha <= 0) {
+        particles.splice(index, 1);
+      } else {
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.radius, 0, 2 * Math.PI);
+        ctx.fillStyle = p.color.replace('hsl', 'hsla').replace(')', `,${p.alpha})`);
+        ctx.fill();
+      }
+    });
+
+    requestAnimationFrame(animateFireworks);
+  }
+
+  setInterval(createFirework, 1500);
+  animateFireworks();
+
+  window.addEventListener('resize', () => {
+    W = window.innerWidth;
+    H = window.innerHeight;
+    canvas.width = W;
+    canvas.height = H;
+  });
+</script>
+
+</body>
+</html>
